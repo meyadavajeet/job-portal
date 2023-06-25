@@ -50,4 +50,44 @@ userSchema.methods.createJWT = function () {
     expiresIn: "1d",
   });
 };
+
+userSchema.statics.findAllUsers = async function () {
+  try {
+    const users = await this.aggregate([
+      {
+        $match: {
+          _id: {
+            $exists: true,
+          },
+          location: {
+            $ne: null,
+          },
+        },
+      },
+      {
+        $addFields: {
+          fullName: {
+            $concat: [
+              { $ifNull: ["$firstName", ""] },
+              " ",
+              { $ifNull: ["$lastName", ""] },
+            ],
+          },
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          password: 0,
+          firstName: 0,
+          lastName: 0,
+          __v: 0,
+        },
+      },
+    ]);
+    return users;
+  } catch (error) {
+    console.log("error in findAllUser", error.message);
+  }
+};
 export default mongoose.model("User", userSchema);
