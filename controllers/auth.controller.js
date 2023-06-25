@@ -1,10 +1,10 @@
 import userModel from "../models/user.model.js";
 
 export const registerController = async (req, res, next) => {
-  debugger
+  debugger;
   const { firstName, lastName, email, password } = req.body;
 
-  console.log('inside register controller');
+  console.log("inside register controller");
   //validate
   if (!firstName) {
     next("name is required");
@@ -56,7 +56,9 @@ export const loginController = async (req, res, next) => {
   res.status(200).json({
     success: true,
     message: "Login SUccessfully",
-    user,
-    token,
+    data: {
+      user,
+      token,
+    },
   });
 };

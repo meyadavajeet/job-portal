@@ -11,6 +11,7 @@ import connectDB from "./config/mongoose.connection.js";
 //routes imports
 import authRoutes from "./routes/auth.routes.js";
 import errorMiddleware from "./middlewares/error.middleware.js";
+import userRoutes from "./routes/user.routes.js";
 
 //dotenv config
 dotenv.config();
@@ -30,6 +31,8 @@ const api = process.env.API_END_POINT;
 
 //routes
 app.use(api + "users/auth/", authRoutes);
+
+app.use(api + "users/", userRoutes);
 
 //validation middleware
 app.use(errorMiddleware);

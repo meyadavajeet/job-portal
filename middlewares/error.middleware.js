@@ -1,13 +1,12 @@
 //error middleware || NEXT function
 const errorMiddleware = (err, req, res, next) => {
-  console.log(err, 'error response');
+  console.log(err, "error response");
   const defaultErrors = {
     statusCode: 500,
     success: false,
     message: err,
     data: [],
   };
-
 
   // missing filed error
   if (err.name === "ValidationError") {
@@ -19,6 +18,7 @@ const errorMiddleware = (err, req, res, next) => {
 
   // duplicate error
   if (err.code && err.code === 11000) {
+    console.log("err.code ", err.code);
     defaultErrors.statusCode = 409;
     defaultErrors.message = `${Object.keys(
       err.keyValue
@@ -27,7 +27,7 @@ const errorMiddleware = (err, req, res, next) => {
   res.status(defaultErrors.statusCode).json({
     success: false,
     message: defaultErrors.message,
-    data: []
+    data: [],
   });
 };
 
