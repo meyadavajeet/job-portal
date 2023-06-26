@@ -13,3 +13,41 @@ export const getUsers = async (req, res, next) => {
     process.abort();
   }
 };
+
+export const updateUsers = async (req, res, next) => {
+  const { firstName, email, location } = req.body;
+
+  console.log("inside register controller");
+  //validate
+  if (!firstName) {
+    next("name is required");
+  }
+  if (!email) {
+    next("email is required");
+  }
+  if (!location) {
+    next("location is required");
+  }
+  const user = await userModel.findOne({ _id: req.params.id });
+  if (!user) {
+    next("User with this id  not exist");
+  }
+  user.firstName = firstName;
+  if (req.body.lastName) {
+    user.lastName = req.body.lastName;
+  }
+  user.email = email;
+  user.location = location;
+
+  await user.save();
+  const token = user.createJWT();
+
+  res.status(200).send({
+    success: true,
+    message: "Successfully Updated!!",
+    data: {
+      user,
+      token,
+    },
+  });
+};
