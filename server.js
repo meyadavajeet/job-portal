@@ -8,10 +8,16 @@ import morgan from "morgan";
 // file imports
 import connectDB from "./config/mongoose.connection.js";
 
+// Security packages
+import helmet from "helmet";
+import xss from "xss-clean";
+import expressMongoSanitize from "express-mongo-sanitize";
+
 //routes imports
 import authRoutes from "./routes/auth.routes.js";
 import errorMiddleware from "./middlewares/error.middleware.js";
 import userRoutes from "./routes/user.routes.js";
+import jobRoutes from "./routes/job.routes.js";
 
 //dotenv config
 dotenv.config();
@@ -27,6 +33,11 @@ app.use(express.json());
 app.use(cors());
 app.use(morgan("dev"));
 
+// security middleware
+app.use(helmet());
+app.use(xss());
+app.use(expressMongoSanitize());
+
 const api = process.env.API_END_POINT;
 
 //routes
@@ -34,6 +45,7 @@ app.use(api + "users/auth/", authRoutes);
 
 app.use(api + "users/", userRoutes);
 
+app.use(api + "job", jobRoutes);
 //validation middleware
 app.use(errorMiddleware);
 
