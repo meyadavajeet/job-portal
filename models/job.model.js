@@ -34,4 +34,6 @@ const jobSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+jobSchema.static.jobStats = async function (req, res) {};
+
 export default mongoose.model("Job", jobSchema);
