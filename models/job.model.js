@@ -13,7 +13,7 @@ const jobSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["Pending", "reject", "interview"],
+      enum: ["pending", "reject", "interview"],
       default: "pending",
     },
     workType: {
@@ -34,6 +34,53 @@ const jobSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-jobSchema.static.jobStats = async function (req, res) {};
+jobSchema.static.jobStats = async function (req, res) {
+  try {
+    const stats = await this.aggregate([
+      {
+        $match: {
+          createdBy: new mongoose.Types.ObjectId(req.user.userId),
+        },
+      },
+      {
+        $group: {
+          _id: "$status",
+          count: {
+            $sum: 1,
+          },
+        },
+      },
+    ]);
+    return stats;
+  } catch (error) {
+    console.log(`error in jobStats model function ${error}`);
+  }
+};
+
+jobSchema.static.monthlyApplicationStats = async function (req, res) {
+  try {
+    const stats = await this.aggregate([
+      {
+        $match: {
+          createdBy: new mongoose.Types.ObjectId(req.user.userId),
+        },
+      },
+      {
+        $group: {
+          _id: {
+            year: { $year: "$createdAt" },
+            month: { $month: "$createdAt" },
+          },
+          count: {
+            $sum: 1,
+          },
+        },
+      },
+    ]);
+    return stats;
+  } catch (error) {
+    console.log(`error in monthlyStats model function ${error}`);
+  }
+};
 
 export default mongoose.model("Job", jobSchema);
