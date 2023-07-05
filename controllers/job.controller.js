@@ -1,5 +1,4 @@
-import jobModel from "../models/job.model.js";
-import mongoose from "mongoose";
+import jobsModel from "../models/job.model.js";
 import moment from "moment";
 import { catchAsyncError } from "../middlewares/catch.async.error.js";
 import ErrorHandler from "../utils/ErrorHandler.js";
@@ -11,7 +10,14 @@ export const createJob = catchAsyncError(async (req, res, next) => {
   }
   req.body.createdBy = req.user.userId;
   const job = await jobsModel.create(req.body);
-  res.status(201).json({ job });
+
+  return res.status(201).send({
+    status: true,
+    message: "Job created successfully!!",
+    data: {
+      job,
+    },
+  });
 });
 
 export const getAllJobs = catchAsyncError(async (req, res, next) => {
@@ -37,7 +43,7 @@ export const getAllJobs = catchAsyncError(async (req, res, next) => {
     };
   }
 
-  let queryResult = jobModel.find(queryObject);
+  let queryResult = jobsModel.find(queryObject);
 
   //   sorting
   if (sort === "latest") {
@@ -129,11 +135,43 @@ export const deleteJob = catchAsyncError(async (req, res, next) => {
 });
 
 export const jobStats = catchAsyncError(async (req, res, next) => {
-  const jobStats = await jobModel.jobStats(req, res);
+  const stats = await jobsModel.jobStats(req, res);
+
+  // default stats
+  const defaultStats = {
+    pending: stats.pending || 0,
+    reject: stats.reject || 0,
+    interview: stats.interview || 0,
+  };
+
+  // monthly yearly stats
+  let monthlyApplicationStats = await JobsModel.monthlyApplicationStats(
+    req,
+    res
+  );
+
+  let monthlyApplication = monthlyApplicationStats
+    .map((item) => {
+      const {
+        _id: { year, month },
+        count,
+      } = item;
+
+      const date = moment()
+        .month(month - 1)
+        .year(year)
+        .format("MMM, Y");
+      return { date, count };
+    })
+    .reverse();
 
   return res.status(200).json({
     status: true,
     message: "Success, Job Deleted!",
-    data: jobStats,
+    data: {
+      totalJobs: stats.length,
+      defaultStats,
+      monthlyApplication,
+    },
   });
 });
